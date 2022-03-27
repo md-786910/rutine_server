@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router()
 const fetch = require('node-fetch');
-
 const rutineModel = require("./db/schema")
 
-
 const isAuthenticated = require("./isAuthenticate/isAuth")
+
+router.get("/", (req, res) => {
+    res.send("hi my server rutine Handler")
+})
 
 router.get('/get', (req, res) => {
     res.status(200).send("hi router")
@@ -59,19 +61,20 @@ router.post("/register", async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { password } = req.body
-
         // console.log(req.cookies.jwt)
         if (password) {
             const checkUser = await rutineModel.findOne({ password: password });
 
             // set cookies
             const token = await checkUser.generateAuthToken();
+            console.log(typeof token)
 
-            res.cookie("jwtToken", token, {
-                expires: new Date(Date.now() + 2500000),
-                secure: true,
-                httpOnly: true,
+            res.cookie("jwToken", token, {
+                expires: new Date(Date.now() + 225892000000),
+                sameSite: 'strict',
+                httpOnly: true
             })
+
             res.status(200).send({ msg: "user login successfully" })
         }
         else {
@@ -84,15 +87,21 @@ router.post('/login', async (req, res) => {
 
 
 /*----------------------------------------------Add topic and show honours---------------------------*/
-router.post('/set_topic', async (req, res, next) => {
+router.post('/set_topic', async (req, res) => {
     try {
+
         const { done, topic } = req.body
+        // console.log(req.body)
         const password = 123
         const userExist = await rutineModel.findOne({ password: password });
 
         if (userExist) {
             const saveTopic = await userExist.setTopic(topic, done)
             res.status(200).send(saveTopic)
+        }
+        else {
+            res.status(500).send({ msg: " Internal Server Error" })
+
         }
 
     } catch (error) {
@@ -210,17 +219,22 @@ router.get('/rutine_data', async function (req, res) {
 
 
 /*----------------delete topic --------------------------*/
-router.post("/deleteTopic", async (req, res) => {
+router.post("/deleteTopic", async (req, res, next) => {
     try {
 
         const { index } = req.body
-        // console.log(index)
+
+
         const password = 123
+
         const userExists = await rutineModel.findOne({ password: password })
 
         const topDelete = await userExists.deleteTopic(index)
 
+
+
         res.status(200).send({ msg: "topic deleted successfully" })
+
 
 
     } catch (error) {

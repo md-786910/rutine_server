@@ -117,11 +117,12 @@ const rutineSchema = new mongoose.Schema({
             },
         }
     ],
-    tokens: [
 
+    tokens: [
         {
             token: {
                 type: Array,
+
             }
         }
     ]
@@ -139,7 +140,7 @@ rutineSchema.methods.generateAuthToken = async function () {
     try {
         console.log("message from login auth token -> generateAuthToken")
 
-        let token = jwt.sign({ id: this._id }, process.env.SECRET_KEY)
+        let token = jwt.sign({ _id: this._id }, process.env.SECRET_KEY)
 
         this.tokens = this.tokens.concat({ token: token })
 
@@ -156,6 +157,7 @@ rutineSchema.methods.setTopic = async function (topic, done) {
         this.topic = this.topic.concat({ topic: topic, status: done })
         await this.save()
         return this.topic
+
     } catch (error) {
         return "error from set topic"
     }
